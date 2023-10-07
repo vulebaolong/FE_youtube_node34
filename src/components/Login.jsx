@@ -3,49 +3,71 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Box, CardMedia } from "@mui/material";
 
 import { Videos, ChannelCard } from ".";
-import { fetchFromAPI, loginApi } from "../utils/fetchFromAPI";
+import { fetchFromAPI, loginApi, loginFacebookApi } from "../utils/fetchFromAPI";
+import ReactFacebookLogin from "react-facebook-login";
 
 const Login = () => {
-  const [channelDetail, setChannelDetail] = useState();
-  const [videos, setVideos] = useState(null);
+    const [channelDetail, setChannelDetail] = useState();
+    const [videos, setVideos] = useState(null);
 
-  const { id } = useParams();
-  const navigate = useNavigate();
-  useEffect(() => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    useEffect(() => {}, []);
 
-  }, []);
+    return (
+        <div className="p-5 " style={{ minHeight: "100vh" }}>
+            <div className=" d-flex justify-content-center">
+                <form className="row g-3 text-white">
+                    <div className="col-md-12">
+                        <label htmlFor="inputEmail4" className="form-label">
+                            Email
+                        </label>
+                        <input type="email" className="form-control" id="email" />
+                    </div>
 
-  return <div className="p-5 " style={{ minHeight: "100vh" }}>
-    <div className=" d-flex justify-content-center">
-      <form className="row g-3 text-white">
-        <div className="col-md-12">
-          <label htmlFor="inputEmail4" className="form-label">Email</label>
-          <input type="email" className="form-control" id="email" />
+                    <div className="col-md-12">
+                        <label htmlFor="inputEmail4" className="form-label">
+                            Password
+                        </label>
+                        <input className="form-control" id="pass" />
+                    </div>
+                    <div className="col-12">
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={() => {
+                                let email = document.querySelector("#email").value;
+                                let pass_word = document.querySelector("#pass").value;
+
+                                loginApi({ email, pass_word })
+                                    .then((result) => {
+                                        localStorage.setItem("USER_LOGIN", result);
+                                        window.location.href = "/";
+                                    })
+                                    .catch((err) => console.log(err));
+                            }}
+                        >
+                            Login
+                        </button>
+                    </div>
+                    <ReactFacebookLogin
+                        appId="844631370420415"
+                        autoLoad={true}
+                        fields="name,email,picture"
+                        callback={(res) => {
+                            console.log(res);
+                            loginFacebookApi({ face_app_id: res.id })
+                                .then((result) => {
+                                    localStorage.setItem("USER_LOGIN", result);
+                                    window.location.href = "/";
+                                })
+                                .catch(console.log);
+                        }}
+                    />
+                </form>
+            </div>
         </div>
-
-        <div className="col-md-12">
-          <label htmlFor="inputEmail4" className="form-label">Password</label>
-          <input className="form-control" id="pass" />
-        </div>
-        <div className="col-12">
-          <button type="button" className="btn btn-primary"
-            onClick={() => {
-
-              let email = document.querySelector("#email").value;
-              let pass_word = document.querySelector("#pass").value;
-
-              loginApi({ email, pass_word }).then(result => {
-
-                localStorage.setItem("USER_LOGIN", result);
-                window.location.href = "/"
-              }).catch(err => console.log(err))
-
-            }}
-          >Login</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    );
 };
 
 export default Login;
